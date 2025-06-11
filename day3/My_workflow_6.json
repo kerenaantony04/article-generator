@@ -1,0 +1,341 @@
+{
+  "name": "My workflow 6",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "leave application",
+        "formDescription": "you'll get a reply mail",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Designation",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "UI/UX"
+                  },
+                  {
+                    "option": "Developer"
+                  },
+                  {
+                    "option": "Product Manager"
+                  }
+                ]
+              },
+              "multiselect": true,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "From Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "To Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Already Leave Taken",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "831e81ae-ddeb-4260-9cba-a967dc03ed1f",
+      "name": "On form submission",
+      "webhookId": "ba5f46c3-bd40-4e14-bb8a-2b7fe3a8de1f"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "14SciW_FlR1bDhZ_ELk1R4yIFqCqzvmKXNcDqMWYCRgo",
+          "mode": "list",
+          "cachedResultName": "leave form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14SciW_FlR1bDhZ_ELk1R4yIFqCqzvmKXNcDqMWYCRgo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14SciW_FlR1bDhZ_ELk1R4yIFqCqzvmKXNcDqMWYCRgo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email ID",
+              "displayName": "Email ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Designation",
+              "displayName": "Designation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "From Date",
+              "displayName": "From Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "To Date",
+              "displayName": "To Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "formMode",
+              "displayName": "formMode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Leave Applicable",
+              "displayName": "Leave Applicable",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Already Leave Taken",
+              "displayName": "Already Leave Taken",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        140,
+        0
+      ],
+      "id": "130f7b2c-b09f-4726-8b08-30acd1deb2be",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6kYCRuxzxsDQRVbb",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a decision maker check the details from the google sheet and then decide whether the leave can be approve or not based on the available leave days to take.The approve and then reject is based on the more then 1 leave already taken if they didnot take any leave then it is approved orelse the leave is rejected.here is the input \n\n\nHere is the input below: \n{{ $json.markdown }}\n\n\nOutput Structure:\nYour leave is approved or not (Output)\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        700,
+        0
+      ],
+      "id": "0b73e898-ef86-40a5-8a43-c76cbc04930a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        740,
+        220
+      ],
+      "id": "20b635f1-1a77-4ae9-8a14-f0db7dead5e0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bnUU6yEo0z5rP4Ct",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input data from the previous node\nconst items = $input.all();\n\n// Extract data\nconst rows = items.map(item => item.json);\n\n// Get headers from the first object\nconst headers = Object.keys(rows[0]);\n\n// Create Markdown header row\nconst headerRow = `| ${headers.join(' | ')} |`;\n\n// Create Markdown separator row\nconst separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;\n\n// Create Markdown data rows\nconst dataRows = rows.map(row => {\n  return `| ${headers.map(header => row[header]).join(' | ')} |`;\n});\n\n// Combine all parts\nconst markdown = [headerRow, separatorRow, ...dataRows].join('\\n');\n\n// Return Markdown as output\nreturn [\n  {\n    json: {\n      markdown,\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "307c7d09-38e1-494f-87ee-7198562a5e4e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets').item.json['Email ID'] }}",
+        "subject": "Your Leave Request Approval",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1060,
+        20
+      ],
+      "id": "63a5db48-7ccf-4c0d-923f-237289fded30",
+      "name": "Gmail",
+      "webhookId": "ceaa0e66-c882-4762-a98b-158dded26b2a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CDBbo0YWNlxW929r",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1f2c039d-d6fc-4967-8f94-a902c80aa844",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1fd88f7d1de37e03dc4aec0a6a0e8bc180e44dba337b2acb0195d12c3f5d7837"
+  },
+  "id": "0D7sfhfk1GxvNAez",
+  "tags": []
+}
