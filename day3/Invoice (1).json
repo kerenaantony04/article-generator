@@ -1,0 +1,222 @@
+{
+  "name": "Invoice",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        -160
+      ],
+      "id": "61941d30-0fe5-4b5c-b8d9-dcde5d4a3957",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Youre an ai agent youre role is to get the due unpaid detail with include daysoverdue,Amount,Due Amount,EmailID and Client Name\n\nHere is the data {{ $json.markdown }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -160
+      ],
+      "id": "ca8bf52b-a3b3-4840-acb3-451a034efebe",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        760,
+        120
+      ],
+      "id": "e9f1bb2c-875d-4dd8-a938-070c11cd08bb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "E8f6SdPNf71fY2AC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1nAy5SqUYvMNiMRiqrlsLi9L43wGLbl9ydfmilNPJHTM",
+          "mode": "list",
+          "cachedResultName": "Invoice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nAy5SqUYvMNiMRiqrlsLi9L43wGLbl9ydfmilNPJHTM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nAy5SqUYvMNiMRiqrlsLi9L43wGLbl9ydfmilNPJHTM/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        120,
+        -160
+      ],
+      "id": "38c5c97a-7798-4e7a-96f9-2bdc839dfc53",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NaWBkUFiSLfXKPhY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (items.length === 0) return [];\n\nconst headers = Object.keys(items[0].json);\nconst headerRow = `| ${headers.join(' | ')} |`;\nconst separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;\n\nconst dataRows = items.map(item => {\n  return `| ${headers.map(h => item.json[h]).join(' | ')} |`;\n});\n\nconst markdownTable = [headerRow, separatorRow, ...dataRows].join('\\n');\n\nreturn [{ json: { markdown: markdownTable } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        -160
+      ],
+      "id": "4c7b373c-5bf7-4dd0-8a29-01e517f25d14",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"EmailID\": {\n\t\t\t\"type\": \"array\"\n\t\t},\n      \"Client Name\": {\n\t\t\t\"type\": \"array\"\n\t\t},\n\t\t\"Due Amount\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"Days Overdue\": {\n\t\t\t\t\"type\": \"arrray\"\n\t\t\t}\n\t\t}\n\t}\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        -160
+      ],
+      "id": "6d8cb453-65fa-48a5-905f-fdf23ea4073b",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.output.EmailID[0] }}",
+        "subject": "=Payment Reminder – Overdue Invoices ",
+        "emailType": "text",
+        "message": "=Dear [{{ $json.output['Client Name'] }}],  I hope you are doing well.  This is a kind reminder that the following invoices from our records are overdue for payment as of June 11, 2025. We request your prompt attention to settle the outstanding amounts to avoid any interruptions in service or late fees.\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1280,
+        -160
+      ],
+      "id": "359b5c72-0f18-484e-b912-181955f0eb31",
+      "name": "Gmail",
+      "webhookId": "fbaa6cbe-b498-4056-bbb4-ada69478dd9a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j1AlDptFOIfLwuiw",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6ac0fcfb-88cd-4d30-a70c-f0d2ee31e5ea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1fd88f7d1de37e03dc4aec0a6a0e8bc180e44dba337b2acb0195d12c3f5d7837"
+  },
+  "id": "hKFt7VbLmq2HVBDl",
+  "tags": []
+}
