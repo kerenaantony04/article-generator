@@ -1,0 +1,202 @@
+{
+  "name": "Post meeting",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Post-Meeting Action Submission",
+        "formDescription": "Please submit a summary of the meeting you attended. Be sure to include any action items discussed, who is responsible for each task, and the expected deadlines. This helps keep everyone aligned and accountable.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Meeting Title",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Team/Department ",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Development"
+                  },
+                  {
+                    "option": "Marketing"
+                  },
+                  {
+                    "option": "Designer"
+                  }
+                ]
+              },
+              "multiselect": true,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Action What to do?",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Assigned To",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "589c1ed5-049c-4004-afd2-69b824b337bb",
+      "name": "On form submission",
+      "webhookId": "b010c4df-14f9-4306-bb85-bb8959dda094"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You're a task assigner Youre Role to Remind their Task which was mentioned on the Last mail \n\noutput \nthis task was assigned by teamLead \nMeeting title :{{ $json['Meeting Title'] }}\nyour task :{{ $json['Action What to do?'] }}\nassigned to :{{ $json['Assigned To'] }}\nteam/development : {{ $json['Team/Department '] }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "ec8848f7-8c73-4936-b918-0bf590201dad",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        420,
+        240
+      ],
+      "id": "d7871ac1-1f18-44b2-bb24-dfd69e15e003",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "E8f6SdPNf71fY2AC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"Team/Developmen\": {\n\t\t\t\"type\": \"array\"\n\t\t},\n      \"Task\": {\n\t\t\t\"type\": \"array\"\n\t\t},\n\t\t\"Assigned To\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"Task\": {\n\t\t\t\t\"type\": \"array\"\n\t\t\t}\n\t\t}\n\t}\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        0
+      ],
+      "id": "445ee95c-3615-486d-894c-4269b9e84ec7",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "⏰ Task Reminder: Action Item Pending from Recent Meeting",
+        "emailType": "text",
+        "message": "=Kindly ensure that the task is completed on time. If you've already completed it, please ignore this message or update the project tracker accordingly. \nHere is Your Task {{ $json.output.Task[0] }}\nWhich is assigned by Your Team Leader\nIf you need assistance or foresee any delays, feel free to reach out.  Thanks for your commitment and contribution!  Best regards, Project Coordinator [Your Company Name]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        0
+      ],
+      "id": "9057b0f1-54ec-4eb5-9ae4-32af3fe1ed65",
+      "name": "Gmail",
+      "webhookId": "0481e8da-d7c0-4fa6-beda-557ce42ca046",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j1AlDptFOIfLwuiw",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "71272ebf-1286-4320-8bed-bde162461a82",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1fd88f7d1de37e03dc4aec0a6a0e8bc180e44dba337b2acb0195d12c3f5d7837"
+  },
+  "id": "k1QzESNY4D6DGB6v",
+  "tags": []
+}
